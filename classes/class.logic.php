@@ -180,8 +180,8 @@ class Logic extends GPFunctions{
 	
 	public static function getIOReply($input,$ios){
 		foreach ($ios as $io) {
-            if (in_array($input, explode("|",$io["input"]))) {
-                return $io["output"];
+            if (in_array($input, explode("|",$io["i"]))) {
+                return $io["o"];
             }
         }
         return '';

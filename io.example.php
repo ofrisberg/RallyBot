@@ -1,9 +1,9 @@
 <?php
 return [
-	["input" => "HEJ|TJA|TJENA|HALLÅ|HEJSAN",
-	"output" => "Hejsan! :)"]
+	["i" => "HEJ|TJA|TJENA|HALLÅ|HEJSAN",
+	"o" => "Hejsan! :)"]
 	,
-	["input" => "HEJDÅ|BYE",
-	"output" => "Hörs senare kanske!"]
+	["i" => "HEJDÅ|BYE",
+	"o" => "Hörs senare kanske!"]
 ];
 ?>

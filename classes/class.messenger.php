@@ -24,7 +24,7 @@ class Messenger {
         }
         if (isset($this->inp['entry'][0]['messaging'][0]['message']['text'])) {
             $this->message = $this->inp['entry'][0]['messaging'][0]['message']['text'];
-            $this->message = trim(mb_strtoupper($this->message), "?.,!");
+            $this->message = trim(mb_strtoupper($this->message), "?.!");
         } else if (isset($this->inp['entry'][0]['messaging'][0]['message']['attachments'][0]['type'])) {
             $attatch = $this->inp['entry'][0]['messaging'][0]['message']['attachments'][0];
             if ($attatch['type'] == 'image') {
