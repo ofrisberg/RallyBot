@@ -4,6 +4,39 @@ class Logic extends GPFunctions{
 		
 	public function __construct() {}
 	
+	
+	public static function onNoReply($user,$message){
+		if($user->setState(1)){
+			return "Jag förstår inte... Ska jag kontakta rallykå? :s (ja/Nej)";
+		}
+		return "Något gick fel och jag kunde inte uppdatera din status :/";
+	}
+	
+	public static function onYesNoReply($user,$message){
+		if(preg_match('/^JA$/iu',$message,$matches)){
+			if($user->setState(2)){
+				return "Okej, när du är klar med rallykå så skriv 'boten anna' för att prata med mig igen :)";
+			}else{
+				return "Något gick fel och jag kunde inte hämta rallykå :/";
+			}
+		}
+		if($user->setState(0)){
+			return "Jag tar det som ett nej, då får du fortsätta prata med mig ^^";
+		}else{
+			return "Något gick fel och jag har fastnat i en loop :/";
+		}
+	}
+	
+	public static function onTalkingToRallyka($user,$message){
+		if(preg_match('/^BOTEN ANNA$/iu',$message,$matches)){
+			if($user->setState(0)){
+				return "Nu är jag tillbaka :P /Boten Anna";
+			}
+			return "Något gick fel och kontakten med Boten Anna kunde upprättas :/";
+		}
+		return "";
+	}
+	
 	public static function initActiveRally($user,$message,$Me){
 		$reply = "";
 		if(preg_match('/^KOPPLA LAG ([a-z0-9]+)$/iu',$message,$matches)){

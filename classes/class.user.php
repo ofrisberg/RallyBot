@@ -9,6 +9,7 @@ class User extends GPFunctions{
 	/* Construct the user */
 	public function __construct($row) {
 		$this->id = $row["u_id"];
+		$this->state = $row["u_state"];
 		$this->t_id = $row["t_id"];
 		$this->ts_insert = $row["u_ts_insert"];
 	}
@@ -55,12 +56,23 @@ class User extends GPFunctions{
 	public function disconnectTeam(){
 		global $DB;
 		$query = $DB->query("UPDATE r18_users SET t_id=NULL WHERE u_id='$this->id' LIMIT 1");
-		if($query){
-			$this->t_id = "";
-		}
+		if($query){$this->t_id = "";}
 		return $query;
 	}
 	
+	/* Set user state
+	* 0 - Talking to bot
+	* 1 - Waiting for ja/nej reply
+	* 2 - Talking to rallykå */
+	public function setState($state){
+		global $DB;
+		$query = $DB->query("UPDATE r18_users SET u_state='$state' WHERE u_id='$this->id' LIMIT 1");
+		if($query){$this->state = $state;}
+		return $query;
+	}
+	
+	public function isReplyingYesNo(){return $this->state == '1';}
+	public function isTalkingToRallyka(){return $this->state == '2';}
 	
 	public function getId(){return $this->id;}
 	public function getTeamId(){return $this->t_id;}

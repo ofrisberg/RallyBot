@@ -37,34 +37,46 @@ if(!User::existsById($userid)){
 }
 $user = User::constructById($userid);
 
-/* Game control during rally */
-$reply = Logic::initActiveRally($user,$textmessage,$Me);
-
-/* Simple Bot IO replies */
-if($reply == ''){
-	$reply = Logic::getIOReply($textmessage, require "io.php");
+if($user->isReplyingYesNo()){
+	/* Expecting answer on get rallykå-question */
+	$reply = Logic::onYesNoReply($user,$textmessage);
+	
+}else if($user->isTalkingToRallyka()){
+	/* User is talking to rallykå */
+	$reply = Logic::onTalkingToRallyka($user,$textmessage);
+	
+}else{
+	/* Game control during rally */
+	$reply = Logic::initActiveRally($user,$textmessage,$Me);
+	
+	if($reply == ''){
+		/* Simple Bot IO replies */
+		$reply = Logic::getIOReply($textmessage, require "io.php");
+	}
+	
+	if($reply == ''){
+		/* No response reply */
+		$reply = Logic::onNoReply($user,$textmessage);
+	}
 }
 
-/* No response reply */
-if($reply == ''){
-	$reply = "-";
-}
 
-/* Save message and incoming reply if any */
+/* Save message and reply if not empty */
 Message::insert($user->getId(),$textmessage,'from',$user->getTeamId());
-if($reply != ""){
+if($reply != ''){
 	Message::insert($user->getId(),$reply,'to',$user->getTeamId());
 }
 
 $DB->close();
 $time_db_seconds = microtime(true) - $time_db_start;
 
-
-/* Reply to Messenger */
-if(strpos($reply,".jpg") !== false){
-	$Me->replyImage($reply); //image reply
-}else{
-	$Me->reply($reply); //text reply
+if($reply != ''){
+	/* Reply to Messenger if any */
+	if(strpos($reply,".jpg") !== false){
+		$Me->replyImage($reply); //image reply
+	}else{
+		$Me->reply($reply); //text reply
+	}
 }
 exit();
 
