@@ -25,6 +25,7 @@ function init($path, $dbAutoConnect = true){
 	require_once $path.'classes/class.message.php';
 	require_once $path.'classes/class.progress.php';
 	require_once $path.'classes/class.station.php';
+	require_once $path.'classes/class.answer.php';
 	require_once $path.'classes/class.logic.php';
 	
 	ini_set("date.timezone", "Europe/Stockholm");

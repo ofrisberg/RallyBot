@@ -4,6 +4,12 @@ class Logic extends GPFunctions{
 		
 	public function __construct() {}
 	
+	public static function isOpen(){
+		$start = $GLOBALS['CFG']['GENERAL']['start_time'];
+		$end = $GLOBALS['CFG']['GENERAL']['end_time'];
+		$now = date('Y-m-d H:i:s');
+		return ($now >= $start && $now < $end);
+	}
 	
 	public static function onNoReply($user,$message){
 		if($user->setState(1)){
@@ -32,7 +38,7 @@ class Logic extends GPFunctions{
 			if($user->setState(0)){
 				return "Nu är jag tillbaka :P /Boten Anna";
 			}
-			return "Något gick fel och kontakten med Boten Anna kunde upprättas :/";
+			return "Något gick fel och kontakten med Boten Anna kunde inte upprättas :/";
 		}
 		return "";
 	}
@@ -72,8 +78,33 @@ class Logic extends GPFunctions{
 			}catch (Exception $e) {
 				$reply = 'Kunde inte låsa upp. Fel: '.$e->getMessage();
 			}
+		}else if(preg_match('/^STÅLSVAR ([1-7]) (.*)$/iu',$message,$matches)){
+			try{
+				$reply = self::saveAnswer($user,$matches[1],$matches[2]);
+			}catch (Exception $e) {
+				$reply = 'Kunde inte spara svar. Fel: '.$e->getMessage();
+			}
 		}
 		return $reply;
+	}
+	
+	public static function saveAnswer($user,$question_id,$answer_text){
+		if(!$user->hasTeam()){
+			throw new Exception('Du har inget lag');
+		}
+		if(Answer::existsById($question_id,$user->getTeamId())){
+			$answer = Answer::constructById($question_id,$user->getTeamId());
+			if($answer->update($answer_text)){
+				return "Ditt gamla stålsvar uppdaterades";
+			}else{
+				throw new Exception('Kunde inte uppdatera ditt gamla stålsvar');
+			}
+		}
+		if(Answer::insert($question_id,$user->getTeamId(),$answer_text)){
+			return "Ditt nya stålsvar har sparats";
+		}else{
+			throw new Exception('Kunde inte lägga till nytt stålsvar');
+		}
 	}
 	
 	public static function connectUserToTeam($user,$token){
@@ -91,6 +122,7 @@ class Logic extends GPFunctions{
 	}
 	
 	public static function unlock($user,$token){
+		if(!self::isOpen()){throw new Exception('Rallyt är stängt');}
 		if(!$user->hasTeam()){
 			throw new Exception('Du har inget lag');
 		}
@@ -114,6 +146,7 @@ class Logic extends GPFunctions{
 	}
 	
 	public static function unlockByCoords($user,$lat,$lng){
+		if(!self::isOpen()){throw new Exception('Rallyt är stängt');}
 		if(!$user->hasTeam()){
 			throw new Exception('Du har inget lag');
 		}
@@ -139,6 +172,7 @@ class Logic extends GPFunctions{
 	}
 	
 	public static function getHelp($user,$s_id){
+		if(!self::isOpen()){throw new Exception('Rallyt är stängt');}
 		if(!$user->hasTeam()){
 			throw new Exception('Du har inget lag');
 		}
