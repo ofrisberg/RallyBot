@@ -82,9 +82,9 @@ class Logic extends GPFunctions{
 			}catch (Exception $e) {
 				$reply = 'Kunde inte låsa upp. Fel: '.$e->getMessage();
 			}
-		}else if(preg_match('/^HJÄLPREBUS ([0-9]+)$/iu',$message,$matches)){
+		}else if(preg_match('/^HJÄLP ([0-9]+)\.([0-9])$/iu',$message,$matches)){
 			try{
-				$reply = self::getHelp($user, $matches[1]);
+				$reply = self::getHelp($user, $matches[1], $matches[2]);
 			}catch (Exception $e) {
 				$reply = 'Kunde inte hämta hjälprebus. Fel: '.$e->getMessage();
 			}
@@ -189,7 +189,7 @@ class Logic extends GPFunctions{
 		return "Latitud: $lat Longitud: $lng";
 	}
 	
-	public static function getHelp($user,$s_id){
+	public static function getHelp($user,$s_id,$nr_help){
 		if(!self::isOpen($user)){throw new Exception('Rallyt är stängt');}
 		if(!$user->hasTeam()){
 			throw new Exception('Du har inget lag');
@@ -202,22 +202,27 @@ class Logic extends GPFunctions{
 		}
 		$progress = Progress::constructByTeamAndStation($team,$station);
 		
-		if($progress->getNrHelps() <= 3){
-			if(!$progress->increaseHelp()){
+		$nr = intval($nr_help);
+		if($nr < 1 || $nr > 4){
+			throw new Exception('Hjälprebus är 1-3 och facit 4. Inga andra siffror är giltiga efter punkten');
+		}
+		
+		if($progress->getNrHelps() < $nr){
+			if(!$progress->setHelp($nr)){
 				throw new Exception('Kunde inte uppdatera antal');
 			}
 		}
-		
+
 		$replytext = "";
-		if($progress->getNrHelps() <= 0){$replytext = $station->getHelp1();
-		}else if($progress->getNrHelps() == 1){$replytext = $station->getHelp2();
-		}else if($progress->getNrHelps() == 2){$replytext = $station->getHelp3();
-		}else if($progress->getNrHelps() >= 3){$replytext = $station->getFacit();}
+		if($nr == 1){$replytext = $station->getHelp1();
+		}else if($nr == 2){$replytext = $station->getHelp2();
+		}else if($nr == 3){$replytext = $station->getHelp3();
+		}else if($nr == 4){$replytext = $station->getFacit();}
 		
-		if($progress->getNrHelps() < 3 && strpos($replytext,".jpg") !== false){
+		/*if($progress->getNrHelps() < 3 && strpos($replytext,".jpg") !== false){
 			$base_url = $GLOBALS['CFG']['GENERAL']['base_url'];
 			$replytext = $base_url."/images/help/hr".$station->getId()."/".$replytext;
-		}
+		}*/
 		return $replytext;
 	}
 	

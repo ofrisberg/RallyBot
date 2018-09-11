@@ -37,7 +37,7 @@ class Progress extends GPFunctions{
 		return $DB->query("UPDATE r18_progress SET r_help=r_help+1 WHERE t_id='$this->t_id' AND s_id='$this->s_id' LIMIT 1");
 	}
 	
-	/* Set help punishment score (from admin page) */
+	/* Set help punishment score */
 	public function setHelp($nr){
 		global $DB;
 		$nr = intval($nr);
