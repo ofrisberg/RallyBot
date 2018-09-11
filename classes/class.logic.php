@@ -4,10 +4,19 @@ class Logic extends GPFunctions{
 		
 	public function __construct() {}
 	
-	public static function isOpen(){
+	public static function isOpen($user){
 		$start = $GLOBALS['CFG']['GENERAL']['start_time'];
 		$end = $GLOBALS['CFG']['GENERAL']['end_time'];
 		$now = date('Y-m-d H:i:s');
+		
+		$debug = $GLOBALS['CFG']['GENERAL']['debugging'] == 1;
+		$test_ids = [];
+		$test_ids[] = "1795019383892333";//olle
+		$test_ids[] = "1952156258130042";//erik
+		if($debug && in_array($user->getId(),$test_ids)){
+			return true;
+		}
+		
 		return ($now >= $start && $now < $end);
 	}
 	
@@ -43,12 +52,19 @@ class Logic extends GPFunctions{
 		return "";
 	}
 	
+	/* 
+	* KOPPLA LAG <token> --- kopplar messenger-användare till rallylag  
+	* HJÄLPREBUS <nr> --- hämtar aktuell hjälprebus till station <nr>
+	* <delad plats> --- försöker låsa upp närmaste station
+	* STÅLSVAR <nr> <svar> --- sparar <svar> till fråga <nr>
+	*/
 	public static function initActiveRally($user,$message,$Me){
 		$reply = "";
 		if(preg_match('/^KOPPLA LAG ([a-z0-9]+)$/iu',$message,$matches)){
 			try{
 				self::connectUserToTeam($user,$matches[1]);
-				$reply = "Du är ihopkopplad med ett lag ($user->t_id)";
+				$team = Team::constructById($user->getTeamId());
+				$reply = "Du är ihopkopplad med ditt lag! :) \n\n (Startnr: ".$team->getStartPosition().")";
 			}catch (Exception $e) {
 				$reply = 'Kunde inte ihopkoppla. Fel: '.$e->getMessage();
 			}
@@ -58,7 +74,7 @@ class Logic extends GPFunctions{
 			}else{
 				$reply = "Fel: Kunde inte frånkoppla lag";
 			}
-		}else if(preg_match('/^LÅS UPP ([a-z0-9]+)$/iu',$message,$matches)){
+		}else if(false && preg_match('/^LÅS UPP ([a-z0-9]+)$/iu',$message,$matches)){
 			try{
 				$reply = self::unlock($user,$matches[1]);
 			}catch (Exception $e) {
@@ -122,7 +138,7 @@ class Logic extends GPFunctions{
 	}
 	
 	public static function unlock($user,$token){
-		if(!self::isOpen()){throw new Exception('Rallyt är stängt');}
+		if(!self::isOpen($user)){throw new Exception('Rallyt är stängt');}
 		if(!$user->hasTeam()){
 			throw new Exception('Du har inget lag');
 		}
@@ -146,7 +162,7 @@ class Logic extends GPFunctions{
 	}
 	
 	public static function unlockByCoords($user,$lat,$lng){
-		if(!self::isOpen()){throw new Exception('Rallyt är stängt');}
+		if(!self::isOpen($user)){throw new Exception('Rallyt är stängt');}
 		if(!$user->hasTeam()){
 			throw new Exception('Du har inget lag');
 		}
@@ -158,9 +174,9 @@ class Logic extends GPFunctions{
 		$distance = $station->getDistance($lat,$lng);
 		$distance_limit = $GLOBALS['CFG']['GENERAL']['distance_limit'];
 		if($distance > $distance_limit){
-			throw new Exception("$distance > ".$distance_limit." SID: ".$station->getId());
+			throw new Exception("Ni är för långt ifrån stationen");
 		}else{
-			return "Lyckad upplåsning. $distance <= ".$distance_limit. " SID: ".$station->getId();
+			return "Lyckad upplåsning";
 		}
 		
 		if(Progress::exists($team,$station)){
@@ -172,12 +188,13 @@ class Logic extends GPFunctions{
 	}
 	
 	public static function getHelp($user,$s_id){
-		if(!self::isOpen()){throw new Exception('Rallyt är stängt');}
+		if(!self::isOpen($user)){throw new Exception('Rallyt är stängt');}
 		if(!$user->hasTeam()){
 			throw new Exception('Du har inget lag');
 		}
 		$team = Team::constructById($user->getTeamId());
-		$station = Station::constructById($s_id);
+		$s_id_converted = self::convertStationId($team,$s_id);
+		$station = Station::constructById($s_id_converted);
 		if(!Progress::exists($team,$station)){
 			throw new Exception('Lås upp stationen först');
 		}
@@ -201,6 +218,14 @@ class Logic extends GPFunctions{
 		}
 		return $replytext;
 	}
+	
+	public static function convertStationId($team, $s_id){
+		$i = intval($s_id);
+		$sp = $team->getStartPosition();
+		if($sp % 2 == 0){return (11-$i);}
+		return $i;
+	}
+	
 	
 	public static function getBestTimeSQL(){
 		$sql = [];

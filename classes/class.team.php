@@ -11,6 +11,7 @@ class Team extends GPFunctions{
 	/* Construct the team */
 	public function __construct($row) {
 		$this->id = $row["t_id"];
+		$this->start_position = $row["t_start_position"];
 		$this->name = $row["t_name"];
 		$this->token = $row["t_token"];
 		$this->ts_start = $row["t_ts_start"];
@@ -63,9 +64,16 @@ class Team extends GPFunctions{
 	}
 	
 	public function getId(){return $this->id;}
+	public function getStartPosition(){return intval($this->start_position);}
 	public function getName(){return $this->name;}
 	public function getTsStart(){return $this->ts_start;}
 	public function getTsFinish(){return $this->ts_finish;}
+	public function hasStarted(){
+		return $this->getTsStart() != "";
+	}
+	public function hasFinished(){
+		return $this->getTsFinish() != "";
+	}
 }
 
 

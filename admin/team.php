@@ -18,7 +18,8 @@ if(isset($_GET["id"])){
 	$team = Team::constructById($_GET["id"]);
 	
 	if(isset($_POST["s_id"],$_POST["r_ts_unlock"],$_POST["r_help"])){
-		$station = Station::constructById($_POST["s_id"]);
+		$s_id_converted = Logic::convertStationId($team,$_POST["s_id"]);
+		$station = Station::constructById($s_id_converted);
 		$progress = Progress::constructByTeamAndStation($team,$station);
 		$progress->setHelp($_POST["r_help"]);
 		$progress->setTsUnlock(trim($_POST["r_ts_unlock"]));
@@ -39,12 +40,15 @@ if(isset($_GET["id"])){
 		<form style="display: inline;" action="team.php?id=<?= $team->getId() ?>" method="post">
 			<input name="t_ts_start" type="text" value="<?= date('Y-m-d H:i:s') ?>"/>
 			<input type="submit" value="Ändra"/>
+			<?php if($team->hasStarted()){echo 'incheckat';}else{echo 'ej incheckat';} ?>
 		</form>
+		
 		<br/>
 		Måltid: <?= $team->getTsFinish() ?>
 		<form style="display: inline;" action="team.php?id=<?= $team->getId() ?>" method="post">
 			<input name="t_ts_finish" type="text" value="<?= date('Y-m-d H:i:s') ?>"/>
 			<input type="submit" value="Ändra"/>
+			<?php if($team->hasFinished()){echo 'utcheckat';}else{echo 'ej utcheckat';} ?>
 		</form>
 	</div>
 	<?php
