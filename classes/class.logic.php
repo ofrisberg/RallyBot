@@ -30,6 +30,8 @@ class Logic extends GPFunctions{
 	public static function onYesNoReply($user,$message){
 		if(preg_match('/^JA$/iu',$message,$matches)){
 			if($user->setState(2)){
+				$sl = new Slack();
+				$sl->send("Någon vill prata med rallykå på Messenger!");
 				return "Okej, när du är klar med rallykå så skriv 'boten anna' för att prata med mig igen :)";
 			}else{
 				return "Något gick fel och jag kunde inte hämta rallykå :/";
@@ -41,7 +43,7 @@ class Logic extends GPFunctions{
 			return "Något gick fel och jag har fastnat i en loop :/";
 		}
 	}
-	
+		
 	public static function onTalkingToRallyka($user,$message){
 		if(preg_match('/^BOTEN ANNA$/iu',$message,$matches)){
 			if($user->setState(0)){
