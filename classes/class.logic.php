@@ -13,6 +13,7 @@ class Logic extends GPFunctions{
 		$test_ids = [];
 		$test_ids[] = "1795019383892333";//olle
 		$test_ids[] = "1952156258130042";//erik
+		$test_ids[] = "2221643154521269";//evelina
 		if($debug && in_array($user->getId(),$test_ids)){
 			return true;
 		}
@@ -66,7 +67,11 @@ class Logic extends GPFunctions{
 			try{
 				self::connectUserToTeam($user,$matches[1]);
 				$team = Team::constructById($user->getTeamId());
-				$reply = "Du är ihopkopplad med ditt lag! :) \n\n (Startnr: ".$team->getStartPosition().")";
+				$color = "blå";
+				if($team->getStartPosition() % 2 == 1){
+					$color = "orange";
+				}
+				$reply = "Anti shoulder surfing \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n Du är ihopkopplad med ditt lag! :) \n\n (Startnr: ".$team->getStartPosition().", $color bana)";
 			}catch (Exception $e) {
 				$reply = 'Kunde inte ihopkoppla. Fel: '.$e->getMessage();
 			}
@@ -153,9 +158,9 @@ class Logic extends GPFunctions{
 		$progress = Progress::constructByTeamAndStation($team,$station);
 		
 		$max_station_id = Station::getMaxId();
-		if($progress->getStationId() == $max_station_id){
+		if(false && $progress->getStationId() == $max_station_id){
 			return "Grattis, ert lag har gått i mål!";
-		}else if($progress->getStationId() == 0){
+		}else if(false && $progress->getStationId() == 0){
 			return "Rebusrallyt har börjat. Lycka till och kör försiktigt!";
 		}else{
 			return "Lyckad upplåsning";
@@ -176,9 +181,9 @@ class Logic extends GPFunctions{
 		$distance = $station->getDistance($lat,$lng);
 		$distance_limit = $GLOBALS['CFG']['GENERAL']['distance_limit'];
 		if($distance > $distance_limit){
-			throw new Exception("Ni är för långt ifrån stationen");
+			throw new Exception("Ni är för långt ifrån stationen \n\n $distance m, s_id:".$station->getId()."");
 		}else{
-			return "Lyckad upplåsning";
+			return "Lyckad upplåsning \n\n $distance m, s_id:".$station->getId()."";
 		}
 		
 		if(Progress::exists($team,$station)){
@@ -229,7 +234,7 @@ class Logic extends GPFunctions{
 	public static function convertStationId($team, $s_id){
 		$i = intval($s_id);
 		$sp = $team->getStartPosition();
-		if($sp % 2 == 0){return (11-$i);}
+		if($sp % 2 == 1){return (11-$i);}
 		return $i;
 	}
 	
