@@ -15,14 +15,14 @@ class Progress extends GPFunctions{
 		$this->ts_unlock = $row["r_ts_unlock"];
 	}
 	
-	public static function constructByTeamAndStation($team,$station) {
+	public static function constructByTeamAndStation($team,$station,$lat=0,$lng=0) {
 		global $DB;
 		$t_id = $DB->real_escape_string($team->getId());
 		$s_id = $DB->real_escape_string($station->getId());
 		
 		$query = $DB->query("SELECT * FROM r18_progress WHERE t_id='$t_id' AND s_id='$s_id' LIMIT 1");
 		if($query->num_rows == 0){ //team has not unlocked
-			if(!self::insert($team->getId(),$station->getId())){
+			if(!self::insert($team->getId(),$station->getId(),$lat,$lng)){
 				throw new Exception('Internt fel, kunde inte skapa progress');
 			}
 			return self::constructByTeamAndStation($team,$station);
@@ -51,12 +51,12 @@ class Progress extends GPFunctions{
 	}
 	
 	/* Insert new progress */
-	public static function insert($t_id,$s_id){
+	public static function insert($t_id,$s_id,$lat=0,$lng=0){
 		global $DB;
 		$t_id = $DB->real_escape_string($t_id);
 		$s_id = $DB->real_escape_string($s_id);
 		$datetime = date('Y-m-d H:i:s');
-		$sql = "INSERT INTO r18_progress (t_id,s_id,r_help,r_ts_unlock) VALUES ('$t_id','$s_id','0','$datetime')";
+		$sql = "INSERT INTO r18_progress (t_id,s_id,r_help,r_ts_unlock,p_lat,p_lng) VALUES ('$t_id','$s_id','0','$datetime','$lat','$lng')";
 		return $DB->query($sql);
 	}
 	

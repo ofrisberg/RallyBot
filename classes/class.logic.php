@@ -67,9 +67,9 @@ class Logic extends GPFunctions{
 			try{
 				self::connectUserToTeam($user,$matches[1]);
 				$team = Team::constructById($user->getTeamId());
-				$color = "blå";
+				$color = "orange";
 				if($team->getStartPosition() % 2 == 1){
-					$color = "orange";
+					$color = "blå";
 				}
 				$reply = "Anti shoulder surfing \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n Du är ihopkopplad med ditt lag! :) \n\n (Startnr: ".$team->getStartPosition().", $color bana)";
 			}catch (Exception $e) {
@@ -181,17 +181,15 @@ class Logic extends GPFunctions{
 		$distance = $station->getDistance($lat,$lng);
 		$distance_limit = $GLOBALS['CFG']['GENERAL']['distance_limit'];
 		if($distance > $distance_limit){
-			throw new Exception("Ni är för långt ifrån stationen \n\n $distance m, s_id:".$station->getId()."");
-		}else{
-			return "Lyckad upplåsning \n\n $distance m, s_id:".$station->getId()."";
+			throw new Exception("Ni är för långt ifrån stationen \n\n $distance m, s_id:".$station->getId()."\n\n Lat:$lat \n Lng:$lng");
 		}
 		
 		if(Progress::exists($team,$station)){
 			throw new Exception('Redan låst upp stationen');
 		}
-		$progress = Progress::constructByTeamAndStation($team,$station);
+		$progress = Progress::constructByTeamAndStation($team,$station,$lat,$lng);
 		
-		return "Latitud: $lat Longitud: $lng";
+		return "Lyckad upplåsning \n\n $distance m, s_id:".$station->getId()." \n\n Latitud: $lat Longitud: $lng";
 	}
 	
 	public static function getHelp($user,$s_id,$nr_help){
