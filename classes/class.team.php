@@ -16,6 +16,8 @@ class Team extends GPFunctions{
 		$this->token = $row["t_token"];
 		$this->ts_start = $row["t_ts_start"];
 		$this->ts_finish = $row["t_ts_finish"];
+		$this->ts_lunch_in = $row["t_ts_lunch_in"];
+		$this->ts_lunch_out = $row["t_ts_lunch_out"];
 	}
 	public static function constructById($id) {
 		global $DB;
@@ -58,9 +60,30 @@ class Team extends GPFunctions{
 		global $DB;
 		return $DB->query("UPDATE r18_teams SET t_ts_finish='$datetime' WHERE t_id='$this->id'");
 	}
+	public function lunchCheckIn(){
+		global $DB;
+		$dt = date('Y-m-d H:i:s');
+		return $DB->query("UPDATE r18_teams SET t_ts_lunch_in='$dt' WHERE t_id='$this->id'");
+	}
+	public function lunchCheckOut(){
+		global $DB;
+		$dt = date('Y-m-d H:i:s');
+		return $DB->query("UPDATE r18_teams SET t_ts_lunch_out='$dt' WHERE t_id='$this->id'");
+	}
 	
 	public function __toString() {
 		return $this->getId()." | ".$this->getName();
+	}
+	
+	public function getUser(){
+		global $DB;
+		$sql = "SELECT * FROM r18_users WHERE t_id='".$this->getId()."' LIMIT 1";
+		$query = $DB->query($sql);
+		if($query->num_rows == 0){
+			throw new Exception('Ingen ihopkopplad deltagare för lag '.$this->getId().' hittades');
+		}else{
+			return new User($query->fetch_assoc());
+		}
 	}
 	
 	public function getId(){return $this->id;}
@@ -68,6 +91,8 @@ class Team extends GPFunctions{
 	public function getName(){return $this->name;}
 	public function getTsStart(){return $this->ts_start;}
 	public function getTsFinish(){return $this->ts_finish;}
+	public function getTsLunchIn(){return $this->ts_lunch_in;}
+	public function getTsLunchOut(){return $this->ts_lunch_out;}
 	public function hasStarted(){
 		return $this->getTsStart() != "";
 	}

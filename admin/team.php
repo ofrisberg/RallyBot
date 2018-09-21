@@ -23,7 +23,7 @@ if(isset($_GET["id"])){
 		$progress = Progress::constructByTeamAndStation($team,$station);
 		$progress->setHelp($_POST["r_help"]);
 		$progress->setTsUnlock(trim($_POST["r_ts_unlock"]));
-		exit("Framsteg ändrat/skapat. <a href='team.php?id=".$team->getId()."'>team.php?id=".$team->getId()."</a>");
+		exit("Framsteg ändrat. <a href='team.php?id=".$team->getId()."'>team.php?id=".$team->getId()."</a>");
 	}
 	if(isset($_POST["t_ts_start"])){
 		$team->setTsStart(trim($_POST["t_ts_start"]));
@@ -54,8 +54,9 @@ if(isset($_GET["id"])){
 	<?php
 	$id = $DB->real_escape_string($team->getId());
 	$query = $DB->query("SELECT * FROM r18_progress WHERE t_id='$id'");
+	$tot_unlocked = $DB->query("SELECT * FROM r18_progress WHERE t_id='$id' AND r_ts_unlock IS NOT NULL")->num_rows;
 	if($query->num_rows > 0){
-		echo "<h2>Framsteg (".$query->num_rows.")</h2>";
+		echo "<h2>Framsteg ($tot_unlocked/".$query->num_rows.")</h2>";
 		while($row = $query->fetch_assoc()){
 			$pr = new Progress($row);
 			echo (string)$pr."<br/>";
@@ -64,10 +65,10 @@ if(isset($_GET["id"])){
 	?>
 	<div>
 	<form action="team.php?id=<?= $team->getId() ?>" method="post">
-		<h3>Lägg till eller ändra framsteg</h3>
+		<h3>Ändra framsteg</h3>
 		Rebus ID: <input name="s_id" type="number" min="0" max="10"/><br/>
 		Upplåsningstid: <input name="r_ts_unlock" type="text" value="<?= date('Y-m-d H:i:s') ?>"/><br/>
-		Hjälprebusar: <input name="r_help" type="number" min="0" max="4"/><br/>
+		Hjälprebusar: <input value="0" name="r_help" type="number" min="0" max="4"/><br/>
 		<input type="submit" value="Skicka"/>
 	</form>
 	</div>

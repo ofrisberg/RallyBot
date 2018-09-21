@@ -81,12 +81,6 @@ class Logic extends GPFunctions{
 			}else{
 				$reply = "Fel: Kunde inte frånkoppla lag";
 			}
-		}else if(false && preg_match('/^LÅS UPP ([a-z0-9]+)$/iu',$message,$matches)){
-			try{
-				$reply = self::unlock($user,$matches[1]);
-			}catch (Exception $e) {
-				$reply = 'Kunde inte låsa upp. Fel: '.$e->getMessage();
-			}
 		}else if(preg_match('/^HJÄLP ([0-9]+)\.([0-9])$/iu',$message,$matches)){
 			try{
 				$reply = self::getHelp($user, $matches[1], $matches[2]);
@@ -144,30 +138,6 @@ class Logic extends GPFunctions{
 		return;
 	}
 	
-	public static function unlock($user,$token){
-		if(!self::isOpen($user)){throw new Exception('Rallyt är stängt');}
-		if(!$user->hasTeam()){
-			throw new Exception('Du har inget lag');
-		}
-		$team = Team::constructById($user->getTeamId());
-		$station = Station::constructByToken($token);
-
-		if(Progress::exists($team,$station)){
-			throw new Exception('Redan låst upp stationen');
-		}
-		$progress = Progress::constructByTeamAndStation($team,$station);
-		
-		$max_station_id = Station::getMaxId();
-		if(false && $progress->getStationId() == $max_station_id){
-			return "Grattis, ert lag har gått i mål!";
-		}else if(false && $progress->getStationId() == 0){
-			return "Rebusrallyt har börjat. Lycka till och kör försiktigt!";
-		}else{
-			return "Lyckad upplåsning";
-		}
-		
-	}
-	
 	public static function unlockByCoords($user,$lat,$lng){
 		if(!self::isOpen($user)){throw new Exception('Rallyt är stängt');}
 		if(!$user->hasTeam()){
@@ -183,12 +153,9 @@ class Logic extends GPFunctions{
 		if($distance > $distance_limit){
 			throw new Exception("Ni är för långt ifrån stationen \n\n $distance m, s_id:".$station->getId()."\n\n Lat:$lat \n Lng:$lng");
 		}
-		
-		if(Progress::exists($team,$station)){
-			throw new Exception('Redan låst upp stationen');
-		}
-		$progress = Progress::constructByTeamAndStation($team,$station,$lat,$lng);
-		
+
+		$progress = Progress::constructByTeamAndStation($team,$station);
+		$progress->unlock($lat,$lng);
 		return "Lyckad upplåsning \n\n $distance m, s_id:".$station->getId()." \n\n Latitud: $lat Longitud: $lng";
 	}
 	
@@ -200,9 +167,7 @@ class Logic extends GPFunctions{
 		$team = Team::constructById($user->getTeamId());
 		$s_id_converted = self::convertStationId($team,$s_id);
 		$station = Station::constructById($s_id_converted);
-		if(!Progress::exists($team,$station)){
-			throw new Exception('Lås upp stationen först');
-		}
+
 		$progress = Progress::constructByTeamAndStation($team,$station);
 		
 		$nr = intval($nr_help);

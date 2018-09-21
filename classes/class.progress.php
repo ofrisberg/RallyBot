@@ -13,28 +13,21 @@ class Progress extends GPFunctions{
 		$this->s_id = $row["s_id"];
 		$this->nr_helps = intval($row["r_help"]);
 		$this->ts_unlock = $row["r_ts_unlock"];
+		$this->lat = $row["p_lat"];
+		$this->lng = $row["p_lng"];
 	}
 	
-	public static function constructByTeamAndStation($team,$station,$lat=0,$lng=0) {
+	public static function constructByTeamAndStation($team,$station) {
 		global $DB;
 		$t_id = $DB->real_escape_string($team->getId());
 		$s_id = $DB->real_escape_string($station->getId());
 		
 		$query = $DB->query("SELECT * FROM r18_progress WHERE t_id='$t_id' AND s_id='$s_id' LIMIT 1");
-		if($query->num_rows == 0){ //team has not unlocked
-			if(!self::insert($team->getId(),$station->getId(),$lat,$lng)){
-				throw new Exception('Internt fel, kunde inte skapa progress');
-			}
-			return self::constructByTeamAndStation($team,$station);
+		if($query->num_rows == 0){
+			throw new Exception('Internt fel, era framsteg har inte installerats korrekt');
 		}else{
 			return new self($query->fetch_assoc());
 		}
-	}
-	
-	/* Increase help punishment score */
-	public function increaseHelp(){
-		global $DB;
-		return $DB->query("UPDATE r18_progress SET r_help=r_help+1 WHERE t_id='$this->t_id' AND s_id='$this->s_id' LIMIT 1");
 	}
 	
 	/* Set help punishment score */
@@ -50,13 +43,19 @@ class Progress extends GPFunctions{
 		return $DB->query("UPDATE r18_progress SET r_ts_unlock='$datetime' WHERE t_id='$this->t_id' AND s_id='$this->s_id' LIMIT 1");
 	}
 	
-	/* Insert new progress */
-	public static function insert($t_id,$s_id,$lat=0,$lng=0){
+	/* Unlock */
+	public function unlock($lat=0,$lng=0){
+		global $DB;
+		$datetime = date('Y-m-d H:i:s');
+		return $DB->query("UPDATE r18_progress SET r_ts_unlock='$datetime',p_lat='$lat',p_lng='$lng' WHERE t_id='$this->t_id' AND s_id='$this->s_id' LIMIT 1");
+	}
+	
+	/* Insert empty progress before rally */
+	public static function insertEmpty($t_id,$s_id){
 		global $DB;
 		$t_id = $DB->real_escape_string($t_id);
 		$s_id = $DB->real_escape_string($s_id);
-		$datetime = date('Y-m-d H:i:s');
-		$sql = "INSERT INTO r18_progress (t_id,s_id,r_help,r_ts_unlock,p_lat,p_lng) VALUES ('$t_id','$s_id','0','$datetime','$lat','$lng')";
+		$sql = "INSERT INTO r18_progress (t_id,s_id,r_help) VALUES ('$t_id','$s_id','0')";
 		return $DB->query($sql);
 	}
 	
@@ -69,7 +68,15 @@ class Progress extends GPFunctions{
 	}
 	
 	public function __toString() {
-		 return "t_id: ".$this->getTeamId().". s_id: ".$this->getStationId().". nrHelps: ".$this->getNrHelps().". ".$this->getTsUnlock();
+		$out = "t_id: ".$this->getTeamId().". ";
+		if($this->getTeamId() % 2 == 1){
+			$out .= "c_s_id: ".(11-intval($this->getStationId())).". ";
+		}
+		$out .= "s_id: ".$this->getStationId().". ";
+		$out .= "nrHelps: ".$this->getNrHelps().". ";
+		$out .= $this->getTsUnlock()." ";
+		//$out .=  "(".$this->getLatitude().", ".$this->getLongitude().")";
+		return $out;
 	}
 
 	
@@ -77,6 +84,8 @@ class Progress extends GPFunctions{
 	public function getStationId(){return $this->s_id;}
 	public function getNrHelps(){return $this->nr_helps;}
 	public function getTsUnlock(){return $this->ts_unlock;}
+	public function getLatitude(){return $this->lat;}
+	public function getLongitude(){return $this->lng;}
 }
 
 
