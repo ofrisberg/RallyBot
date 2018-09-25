@@ -132,6 +132,9 @@ class Logic extends GPFunctions{
 			throw new Exception('Laget hittades inte');
 		}
 		$team = Team::constructByToken($token);
+		if($team->hasUser()){
+			throw new Exception('Laget kan bara ha en kopplad deltagare samtidigt');
+		}
 		if(!$user->setTeamId($team->id)){
 			throw new Exception('Databas-fel');
 		}

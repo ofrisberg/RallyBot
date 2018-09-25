@@ -14,10 +14,14 @@ class Team extends GPFunctions{
 		$this->start_position = $row["t_start_position"];
 		$this->name = $row["t_name"];
 		$this->token = $row["t_token"];
+		$this->leader = $row["t_leader"];
+		$this->phone = $row["t_phone"];
 		$this->ts_start = $row["t_ts_start"];
 		$this->ts_finish = $row["t_ts_finish"];
 		$this->ts_lunch_in = $row["t_ts_lunch_in"];
 		$this->ts_lunch_out = $row["t_ts_lunch_out"];
+		$this->corr_stal = intval($row["t_corr_stal"]);
+		$this->corr_haftig = intval($row["t_corr_haftig"]);
 	}
 	public static function constructById($id) {
 		global $DB;
@@ -70,6 +74,15 @@ class Team extends GPFunctions{
 		$dt = date('Y-m-d H:i:s');
 		return $DB->query("UPDATE r18_teams SET t_ts_lunch_out='$dt' WHERE t_id='$this->id'");
 	}
+	public function setCorrStal($nr){
+		global $DB;
+		return $DB->query("UPDATE r18_teams SET t_corr_stal='$nr' WHERE t_id='$this->id'");
+	}
+	public function setCorrHaftig($nr){
+		global $DB;
+		return $DB->query("UPDATE r18_teams SET t_corr_haftig='$nr' WHERE t_id='$this->id'");
+	}
+	
 	
 	public function __toString() {
 		return $this->getId()." | ".$this->getName();
@@ -86,13 +99,24 @@ class Team extends GPFunctions{
 		}
 	}
 	
+	public function hasUser(){
+		global $DB;
+		$sql = "SELECT * FROM r18_users WHERE t_id='".$this->getId()."' LIMIT 1";
+		$query = $DB->query($sql);
+		return ($query->num_rows == 1);
+	}
+	
 	public function getId(){return $this->id;}
 	public function getStartPosition(){return intval($this->start_position);}
 	public function getName(){return $this->name;}
+	public function getLeader(){return $this->leader;}
+	public function getPhone(){return $this->phone;}
 	public function getTsStart(){return $this->ts_start;}
 	public function getTsFinish(){return $this->ts_finish;}
 	public function getTsLunchIn(){return $this->ts_lunch_in;}
 	public function getTsLunchOut(){return $this->ts_lunch_out;}
+	public function getCorrStal(){return $this->corr_stal;}
+	public function getCorrHaftig(){return $this->corr_haftig;}
 	public function hasStarted(){
 		return $this->getTsStart() != "";
 	}

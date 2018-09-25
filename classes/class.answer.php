@@ -9,6 +9,7 @@ class Answer extends GPFunctions{
 		$this->q_id = $row['q_id'];
 		$this->t_id = $row['t_id'];
 		$this->answer = $row['answer'];
+		$this->ts_insert = $row['a_ts_insert'];
 	}
 	
 	public static function constructById($q_id,$t_id) {
@@ -33,7 +34,8 @@ class Answer extends GPFunctions{
 		$q_id = $DB->real_escape_string($q_id);
 		$t_id = $DB->real_escape_string($t_id);
 		$answer = $DB->real_escape_string($answer);
-		$sql = "INSERT INTO r18_answers (q_id,t_id,answer) VALUES ('$q_id','$t_id','$answer')";
+		$dt = date('Y-m-d H:i:s');
+		$sql = "INSERT INTO r18_answers (q_id,t_id,answer,a_ts_insert) VALUES ('$q_id','$t_id','$answer','$dt')";
 		return $DB->query($sql);
 	}
 	
@@ -45,6 +47,19 @@ class Answer extends GPFunctions{
 		$answer = $DB->real_escape_string($answer);
 		$sql = "UPDATE r18_answers SET answer='$answer' WHERE q_id='$q_id' AND t_id='$t_id'";
 		return $DB->query($sql);
+	}
+	
+	public function getQuestionId(){return $this->q_id;}
+	public function getTeamId(){return $this->t_id;}
+	public function getAnswer(){return $this->answer;}
+	public function getTsInsert(){return $this->ts_insert;}
+	
+	public function __toString() {
+		$time = substr($this->getTsInsert(),11,5);
+		$q_id = $this->getQuestionId();
+		$t_id = $this->getTeamId();
+		$answer = $this->getAnswer();
+		return "$time: q_id:$q_id. answer:$answer"; //t_id:$t_id. 
 	}
 	
 	
