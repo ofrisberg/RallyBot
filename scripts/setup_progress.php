@@ -8,7 +8,8 @@ if(!isset($_SESSION["rr_admin"]) || !$_SESSION["rr_admin"]){
 	exit();
 }
 
-
+// comment the line below to make the script runnable
+exit();
 
 $query = $DB->query("SELECT * FROM r18_teams");
 if($query->num_rows > 0){

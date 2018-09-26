@@ -16,6 +16,9 @@ class Team extends GPFunctions{
 		$this->token = $row["t_token"];
 		$this->leader = $row["t_leader"];
 		$this->phone = $row["t_phone"];
+		$this->email = $row["t_email"];
+		$this->nr_participants = $row["t_nr_participants"];
+		$this->gasque = $row["t_gasque"];
 		$this->ts_start = $row["t_ts_start"];
 		$this->ts_finish = $row["t_ts_finish"];
 		$this->ts_lunch_in = $row["t_ts_lunch_in"];
@@ -109,8 +112,12 @@ class Team extends GPFunctions{
 	public function getId(){return $this->id;}
 	public function getStartPosition(){return intval($this->start_position);}
 	public function getName(){return $this->name;}
+	public function getToken(){return trim($this->token);}
 	public function getLeader(){return $this->leader;}
-	public function getPhone(){return $this->phone;}
+	public function getPhone(){return trim($this->phone);}
+	public function getEmail(){return trim($this->email);}
+	public function getNrParticipants(){return intval($this->nr_participants);}
+	public function getGasque(){return intval($this->gasque);}
 	public function getTsStart(){return $this->ts_start;}
 	public function getTsFinish(){return $this->ts_finish;}
 	public function getTsLunchIn(){return $this->ts_lunch_in;}
@@ -122,6 +129,9 @@ class Team extends GPFunctions{
 	}
 	public function hasFinished(){
 		return $this->getTsFinish() != "";
+	}
+	public function hasGasque(){
+		return ($this->gasque==1);
 	}
 }
 

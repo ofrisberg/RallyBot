@@ -10,6 +10,7 @@ if(!isset($_SESSION["rr_admin"]) || !$_SESSION["rr_admin"]){
 }
 
 echo '<html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body>';
+echo '<style>table {border-collapse: collapse;}table, th, td {border: 1px solid black;}</style>';
 
 if(isset($_GET["id"])){
 	if(!Team::existsById($_GET["id"])){
@@ -18,6 +19,15 @@ if(isset($_GET["id"])){
 	$team = Team::constructById($_GET["id"]);
 	$all_team_link = "<a href='team.php'>Alla lag</a>";
 	$same_team_link = "<a href='team.php?id=".$team->getId()."'>Samma lag</a>";
+	
+	if(isset($_POST["team_msg"])){
+		$user = $team->getUser();
+		$msg = trim($_POST["team_msg"]);
+		Messenger::send($msg,$user->getId());
+		Message::insert($user->getId(),$msg,'to',$team->getId());
+		exit("Meddelande skickat. $same_team_link | $all_team_link");
+	}
+	
 	if(isset($_POST["s_id"],$_POST["r_unlock_physical"],$_POST["r_help_physical"])){
 		$s_id_converted = Logic::convertStationId($team,$_POST["s_id"]);
 		$station = Station::constructById($s_id_converted);
@@ -26,12 +36,32 @@ if(isset($_GET["id"])){
 		$progress->setUnlockPhysical($_POST["r_unlock_physical"]);
 		exit("Framsteg ändrat. $same_team_link | $all_team_link");
 	}
-	if(isset($_POST["t_ts_start"])){
-		$team->setTsStart(trim($_POST["t_ts_start"]));
+	
+	if(isset($_GET["start"])){
+		if($team->hasStarted()){exit("Laget har redan startat!");}
+		$team->start();
 		exit("Starttid sparad. $same_team_link | $all_team_link");
 	}
-	if(isset($_POST["t_ts_finish"])){
-		$team->setTsFinish(trim($_POST["t_ts_finish"]));
+	if(isset($_GET["finish"])){
+		if($team->hasFinished()){exit("Laget har redan gått i mål!");}
+		$team->finish();
+		
+		$msg = "Jag är ingen bot\n";
+		$msg .= "Jag är en väldigt, väldigt vacker tjej\n\n";
+		if($team->hasGasque()){
+			$to_time = strtotime("2018-09-29 18:00:00");
+			$from_time = strtotime(date('Y-m-d H:i:s'));
+			$minutes = round(abs($to_time - $from_time) / 60,0);
+			$msg .= "Hoppas vi ses på gasquen om $minutes dk minuter :)";
+		}else{
+			$msg .= "Vi ses inte på gasquen men förhoppningsvis på släppet :)";
+		}
+		
+		/* Remove the three lines below if api limit is close */
+		$user = $team->getUser();
+		Messenger::send($msg,$user->getId());
+		Message::insert($user->getId(),$msg,'to',$team->getId());
+		
 		exit("Måltid sparad. $same_team_link | $all_team_link");
 	}
 	if(isset($_POST["t_corr_stal"])){
@@ -44,23 +74,25 @@ if(isset($_GET["id"])){
 	}
 	?>
 	<h1><?= (string)$team ?></h1>
-	<p><b>Lagledare:</b> <?= $team->getLeader() ?> <?= $team->getPhone() ?></p>
-	<div>
-		Starttid: <?= $team->getTsStart() ?>
-		<form style="display: inline;" action="team.php?id=<?= $team->getId() ?>" method="post">
-			<input name="t_ts_start" type="text" value="<?= date('Y-m-d H:i:s') ?>"/>
-			<input type="submit" value="Ändra"/>
-			<?php if($team->hasStarted()){echo 'incheckat';}else{echo 'ej incheckat';} ?>
-		</form>
+	<p>
+		Lagledare: <?= $team->getLeader() ?> <br/>
+		Mobilnummer: <?= $team->getPhone() ?><br/>
+		Email: <?= $team->getEmail() ?><br/>
+		Deltagare: <?= $team->getNrParticipants() ?><br/>
+		Gasque: <?= $team->getGasque() ?><br/>
+		Token: <?= $team->getToken() ?><br/><br/>
 		
-		<br/>
-		Måltid: <?= $team->getTsFinish() ?>
-		<form style="display: inline;" action="team.php?id=<?= $team->getId() ?>" method="post">
-			<input name="t_ts_finish" type="text" value="<?= date('Y-m-d H:i:s') ?>"/>
-			<input type="submit" value="Ändra"/>
-			<?php if($team->hasFinished()){echo 'utcheckat';}else{echo 'ej utcheckat';} ?>
+		Starttid: <?= $team->getTsStart() ?><br/>
+		Måltid: <?= $team->getTsFinish() ?><br/>
+		
+	</p>
+	<p>
+		<form action="team.php?id=<?= $team->getId() ?>" method="post">
+			<input name="team_msg" type="text" placeholder="Meddelande"/>
+			<input type="submit" value="Skicka"/>
 		</form>
-	</div>
+	</p>
+	
 	<?php
 	$id = $DB->real_escape_string($team->getId());
 	$ascdesc = "DESC";
@@ -120,13 +152,38 @@ if(isset($_GET["id"])){
 	}
 	
 }else{
-	$query = $DB->query("SELECT * FROM r18_teams");
+	echo '<table>';
+	$query = $DB->query("SELECT * FROM r18_teams ORDER BY t_start_position ASC");
 	if($query->num_rows > 0){
 		while($row = $query->fetch_assoc()){
 			$team = new Team($row);
-			echo (string)$team." <a href='team.php?id=".$team->getId()."'>Länk</a><br/>";
+			echo "<tr>";
+			echo "<td><a href='team.php?id=".$team->getId()."'>".(string)$team."</a></td>";
+			if($team->hasStarted()){
+				echo "<td></td>";
+			}else{
+				echo "<td><a href='team.php?id=".$team->getId()."&start=1'>Start</a></td>";
+			}
+			if($team->hasFinished() || !$team->hasStarted()){
+				echo "<td></td>";
+			}else{
+				echo "<td><a href='team.php?id=".$team->getId()."&finish=1'>Mål</a></td>";
+			}
+			if($team->hasUser()){
+				echo "<td></td>";
+			}else{
+				echo "<td>missing user</td>";
+			}
+			if(!$team->getPhone() == ''){
+				echo "<td></td>";
+			}else{
+				echo "<td>missing phone</td>";
+			}
+			
+			echo "</tr>";
 		}
 	}
+	echo '</table>';
 }
 
 echo "</body></html>";
