@@ -5,14 +5,6 @@ class Logic extends GPFunctions{
 	public function __construct() {}
 	
 	public static function isOpen($user,$team){
-		$debug = $GLOBALS['CFG']['GENERAL']['debugging'] == 1;
-		$test_ids = [];
-		//$test_ids[] = "1795019383892333";//olle
-		$test_ids[] = "1952156258130042";//erik
-		$test_ids[] = "2221643154521269";//evelina
-		if($debug && in_array($user->getId(),$test_ids)){
-			return true;
-		}
 		if($team->hasStarted() && !$team->hasFinished()){
 			return true;
 		}
@@ -70,7 +62,7 @@ class Logic extends GPFunctions{
 				if($team->getStartPosition() % 2 == 1){
 					$color = "blå";
 				}
-				$reply = "Anti shoulder surfing \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n Du är ihopkopplad med ditt lag! :) \n\n (Startnr: ".$team->getStartPosition().", $color bana)";
+				$reply = "Du är ihopkopplad med ditt lag! :) \n\n (Startnr: ".$team->getStartPosition().", $color bana)";
 			}catch (Exception $e) {
 				$reply = 'Kunde inte ihopkoppla. Fel: '.$e->getMessage();
 			}
@@ -157,12 +149,12 @@ class Logic extends GPFunctions{
 		$distance = $station->getDistance($lat,$lng);
 		$distance_limit = $GLOBALS['CFG']['GENERAL']['distance_limit'];
 		if($distance > $distance_limit){
-			throw new Exception("Ni är för långt ifrån stationen\n\n Lat:$lat \n Lng:$lng"); // \n\n $distance m, s_id:".$station->getId()."
+			throw new Exception("Ni är för långt ifrån stationen\n\n Lat:$lat \n Lng:$lng");
 		}
 
 		$progress = Progress::constructByTeamAndStation($team,$station);
 		$progress->unlock($lat,$lng);
-		return "Lyckad upplåsning \n\n $distance m \n\n Lat:$lat \n Lng:$lng"; //, s_id:".$station->getId()." 
+		return "Lyckad upplåsning \n\n $distance m \n\n Lat:$lat \n Lng:$lng";
 	}
 	
 	public static function getHelp($user,$s_id,$nr_help){
@@ -194,11 +186,7 @@ class Logic extends GPFunctions{
 		}else if($nr == 2){$replytext = $station->getHelp2();
 		}else if($nr == 3){$replytext = $station->getHelp3();
 		}else if($nr == 4){$replytext = $station->getFacit();}
-		
-		/*if($progress->getNrHelps() < 3 && strpos($replytext,".jpg") !== false){
-			$base_url = $GLOBALS['CFG']['GENERAL']['base_url'];
-			$replytext = $base_url."/images/help/hr".$station->getId()."/".$replytext;
-		}*/
+
 		return $replytext;
 	}
 	
