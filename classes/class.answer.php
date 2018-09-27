@@ -59,7 +59,7 @@ class Answer extends GPFunctions{
 		$q_id = $this->getQuestionId();
 		$t_id = $this->getTeamId();
 		$answer = $this->getAnswer();
-		return "$time: q_id:$q_id. answer:$answer"; //t_id:$t_id. 
+		return "$time: q_id:$q_id. answer:".htmlentities($answer).""; //t_id:$t_id. 
 	}
 	
 	

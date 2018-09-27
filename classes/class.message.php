@@ -38,9 +38,9 @@ class Message extends GPFunctions{
 		$time = substr($this->getTsInsert(),11,5);
 		$sign = "<span style='font-size:10px;'><br/>".$this->getId()." | ".$this->getUserId()."<br/></span>";
 		if($this->dir == "to"){
-			return "$time: <span style='font-style:italic;'>".$this->getText()."</span> $sign";
+			return "$time: <span style='font-style:italic;'>".htmlentities($this->getText())."</span> $sign";
 		}
-		return "$time: ".$this->getText()." $sign";
+		return "$time: ".htmlentities($this->getText())." $sign";
 	}
 
 	public function getId(){return $this->id;}
