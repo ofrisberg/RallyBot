@@ -70,6 +70,7 @@ class Station extends GPFunctions{
 	
 	public function getId(){return $this->id;}
 	public function getToken(){return $this->token;}
+	public function getRebus(){return $this->rebus;}
 	public function getHelp1(){return $this->help1;}
 	public function getHelp2(){return $this->help2;}
 	public function getHelp3(){return $this->help3;}

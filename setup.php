@@ -22,6 +22,7 @@ function init($path, $dbAutoConnect = true){
 	require_once $path.'classes/class.user.php';
 	require_once $path.'classes/class.messenger.php';
 	require_once $path.'classes/class.team.php';
+	require_once $path.'classes/class.teamresult.php';
 	require_once $path.'classes/class.message.php';
 	require_once $path.'classes/class.progress.php';
 	require_once $path.'classes/class.station.php';

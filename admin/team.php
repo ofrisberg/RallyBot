@@ -82,7 +82,7 @@ if(isset($_GET["id"])){
 		Gasque: <?= $team->getGasque() ?><br/>
 		Token: <?= $team->getToken() ?><br/><br/>
 		
-		Starttid: <?= $team->getTsStart() ?><br/>
+		Incheckningstid: <?= $team->getTsStart() ?><br/>
 		Måltid: <?= $team->getTsFinish() ?><br/>
 		
 	</p>
@@ -105,7 +105,8 @@ if(isset($_GET["id"])){
 		echo "<h2>Framsteg ($tot_unlocked/".$query->num_rows.")</h2>";
 		while($row = $query->fetch_assoc()){
 			$pr = new Progress($row);
-			echo (string)$pr."<br/>";
+			$st = Station::constructById($pr->getStationId());
+			echo (string)$pr."-------".$st->getRebus()."<br/>";
 		}
 	}
 	?>
@@ -132,7 +133,7 @@ if(isset($_GET["id"])){
 	}
 	?>
 	<form action="team.php?id=<?= $team->getId() ?>" method="post">
-		Korrekta svar (fysiska och digitala): <input value="<?= $team->getCorrStal() ?>" name="t_corr_stal" type="number" min="0" max="7"/><input type="submit" value="Skicka"/>
+		Korrekta svar (fysiska och digitala): <input value="<?= $team->getCorrStal() ?>" name="t_corr_stal" type="number" min="0"/><input type="submit" value="Skicka"/>
 	</form>
 	
 	<h2>Häftigs poäng</h2>

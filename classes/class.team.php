@@ -20,6 +20,7 @@ class Team extends GPFunctions{
 		$this->nr_participants = $row["t_nr_participants"];
 		$this->gasque = $row["t_gasque"];
 		$this->ts_start = $row["t_ts_start"];
+		$this->ts_start2 = $row["t_ts_start2"];
 		$this->ts_finish = $row["t_ts_finish"];
 		$this->ts_lunch_in = $row["t_ts_lunch_in"];
 		$this->ts_lunch_out = $row["t_ts_lunch_out"];
@@ -119,6 +120,7 @@ class Team extends GPFunctions{
 	public function getNrParticipants(){return intval($this->nr_participants);}
 	public function getGasque(){return intval($this->gasque);}
 	public function getTsStart(){return $this->ts_start;}
+	public function getTsStart2(){return $this->ts_start2;}
 	public function getTsFinish(){return $this->ts_finish;}
 	public function getTsLunchIn(){return $this->ts_lunch_in;}
 	public function getTsLunchOut(){return $this->ts_lunch_out;}
