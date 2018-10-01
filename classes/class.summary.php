@@ -46,6 +46,25 @@ class Summary extends GPFunctions{
 		return $this->query("SELECT count(*) as nr FROM r18_teams WHERE t_ts_finish IS NOT NULL AND ".$this->getSQLWhere());
 	}
 	
+	public function getHelpStatsByStation(){
+		global $DB;
+		$arr = [];
+		for($i=1; $i <= 10; $i++){
+			$query = $DB->query("SELECT r_help,r_help_physical FROM r18_progress WHERE s_id='$i' AND t_id<100");
+			$arr[$i] = 0;
+			if($query->num_rows > 0){
+				while($row = $query->fetch_assoc()){
+					$tmp = intval($row[r_help]);
+					if($tmp < intval($row[r_help_physical])){
+						$tmp = intval($row[r_help_physical]);
+					}
+					$arr[$i] += $tmp;
+				}
+			}
+		}
+		return $arr;
+	}
+	
 	public function query($sql){
 		global $DB;
 		return intval($DB->query($sql)->fetch_assoc()["nr"]);

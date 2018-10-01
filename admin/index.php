@@ -23,6 +23,8 @@ $summ = new Summary();
 	<li><a href="messages.php">Meddelanden</a></li>
 	<li><a href="lunch.php">Lunchstation</a></li>
 	<li><a href="https://developers.facebook.com/apps/180505402598044/dashboard/?business_id=709711106054256">Facebook App Dashboard</a></li>
+	<li><a href="results.php">Resultat</a></li>
+	<li><a href="animation.php">Animation</a></li>
 </ul>
 <h2>Sammanfattning</h2>
 <table>
@@ -57,6 +59,10 @@ $summ = new Summary();
 	<tr>
 		<td><b>Avslutade</b></td>
 		<td><?= $summ->nrFinished() ?>/100</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><a href="summary.php">Mer</a></td>
 	</tr>
 </table>
 
