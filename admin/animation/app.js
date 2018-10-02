@@ -26,6 +26,8 @@ var app = {
 		y_bottom: 0,
 	},
 	current_stats: {
+		nr_start : 0,
+		nr_start2 : 0,
 		nr_messages : 0,
 		nr_unlocks : 0,
 		nr_lunchin : 0,
@@ -63,7 +65,7 @@ var app = {
 		this.stats = stats;
 		this.el_map = document.getElementById("map");
 		this.el_clock = document.getElementById("clock");
-		this.current_time = new Date('2018-09-29 08:30:00'); //16:30
+		this.current_time = new Date('2018-09-29 06:00:00'); //16:30
 		this.pixels_per_lng = this.corners.x_right/(this.corners.lng_right-this.corners.lng_left);
 		this.pixels_per_lat = this.corners.y_top/(this.corners.lat_top-this.corners.lat_bottom);
 	},
@@ -110,16 +112,29 @@ var app = {
 				
 				var x = x1 + vx * (this.current_time-t1);
 				var y = y1 + vy * (this.current_time-t1);
+				
+				var color = 'black';
+				if('fail' in d2){color = 'red';} // && ((i+2) >= team['data'].length || (this.pixelDistance(d2,team['data'][i+2]) > 700 || 'fail' in team['data'][i+2]))
+				
 				if(x > this.corners.x_left && x < this.corners.x_right && y < this.corners.y_top && y > this.corners.y_bottom){
-					html += '<span class="dot" style="bottom:'+y+'px;left:'+x+'px;">'+team['nr']+'</span>';
+					html += '<span class="dot" style="bottom:'+y+'px;left:'+x+'px;background:'+color+'">'+team['nr']+'</span>';
 				}
 			}
 		}
 		return html;
 	},
+	pixelDistance: function(d1,d2){
+		var x1 = this.lng2x(d1['lng']);
+		var y1 = this.lat2y(d1['lat']);
+		var x2 = this.lng2x(d2['lng']);
+		var y2 = this.lat2y(d2['lat']);
+		return Math.sqrt(x1*x2+y1*y2);
+	},
 	updateStats: function(){
 		var arr = this.stats[this.current_time.hhmm()];
 		
+		this.current_stats.nr_start += arr['nr_start'];
+		this.current_stats.nr_start2 += arr['nr_start2'];
 		this.current_stats.nr_messages += arr['nr_messages'];
 		this.current_stats.nr_unlocks += arr['nr_unlocks'];
 		this.current_stats.nr_lunchin += arr['nr_lunchin'];
@@ -135,6 +150,8 @@ var app = {
 		
 		var html = '';
 		html += "<tr><td><b>Meddelanden</b></td><td>"+this.current_stats.nr_messages+"</td></tr>";
+		html += "<tr><td><b>Incheckade</b></td><td>"+this.current_stats.nr_start+"</td></tr>";
+		html += "<tr><td><b>Startade</b></td><td>"+this.current_stats.nr_start2+"</td></tr>";
 		html += "<tr><td><b>Upplåsningar</b></td><td>"+this.current_stats.nr_unlocks+"</td></tr>";
 		html += "<tr><td><b>Lunch in</b></td><td>"+this.current_stats.nr_lunchin+"</td></tr>";
 		html += "<tr><td><b>Lunch ut</b></td><td>"+this.current_stats.nr_lunchout+"</td></tr>";
@@ -142,15 +159,18 @@ var app = {
 		html += "<tr><td><b>StåL-svar</b></td><td>"+this.current_stats.nr_answers+"</td></tr>";
 		html += "<tr><td><b>Målgångar</b></td><td>"+this.current_stats.nr_finish+"</td></tr>";
 		html += "<tr><td><b>Boten förstår ej</b></td><td>"+this.current_stats.nr_confused_bot+"</td></tr>";
+		
 		/*html += "<tr><td>-</td><td></td></tr>";
 		html += "<tr><td><b>Rallykåit: Det är kallt</b></td><td>"+this.current_stats.nr_cold_statements+"</td></tr>";
 		html += "<tr><td><b>Patric: Livet suger</b></td><td>"+this.current_stats.nr_patric_hates_life+"</td></tr>";
 		html += "<tr><td><b>Olle: Win win</b></td><td>"+this.current_stats.nr_olle_replies_winwin+"</td></tr>";*/
 		
+		
+		
 		document.getElementById("stats_table").innerHTML = html;
 	},
 	initResult: function(){
-		document.getElementById("clock").innerHTML = 'Och resultatet är...';//
+		document.getElementById("clock").innerHTML = 'Rebusrallyt 2018';//
 		document.getElementById("teams").innerHTML = '';
 		document.getElementById("stats").style.display = 'none';
 		this.timestepResult();

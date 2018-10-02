@@ -9,10 +9,12 @@ session_start();
 }*/
 
 $stats = [];
-$begin = new DateTime("2018-09-29 07:00");
+$begin = new DateTime("2018-09-29 06:00");
 $end   = new DateTime("2018-09-29 18:00");
 for($i = $begin; $i <= $end; $i->modify('+1 minute')){
     $stats[$i->format("H:i")] = [
+		"nr_start" => 0,
+		"nr_start2" => 0,
 		"nr_messages" => 0,
 		"nr_unlocks" => 0,
 		"nr_lunchin" => 0,
@@ -44,7 +46,7 @@ while($row = $query->fetch_assoc()){
 		$subarr["data"][] = [
 			"lat" => 59.820733,
 			"lng" => 17.656450,
-			"ts" => $team->getTsStart2()
+			"ts" => $team->getTsStart()
 		];
 		$subarr["data"][] = [
 			"lat" => 60.000534,
@@ -59,11 +61,19 @@ while($row = $query->fetch_assoc()){
 		while($row2 = $query2->fetch_assoc()){
 			$msg = new Message($row2);
 			if(preg_match('/Lat:([0-9]+\.[0-9]+)\s/iu',$msg->getText(),$matches) && preg_match('/Lng:([0-9]+\.[0-9]+)\b/iu',$msg->getText(),$matches2)){
-				$subarr["data"][] = [
+				$coords = [
 					"lat" => floatval($matches[1]),
 					"lng" => floatval($matches2[1]),
-					"ts" => $msg->getTsInsert()
+					"ts" => $msg->getTsInsert(),
 				];
+				if(strpos($msg->getText(),'Fel:')!==false){
+					$station = Station::constructByCoords($coords[lat],$coords[lng]);
+					$distance = $station->getDistance($coords[lat],$coords[lng]);
+					if($distance > 5000){
+						$coords["fail"] = true;
+					}
+				}
+				$subarr["data"][] = $coords;
 			}
 		}
 		$subarr["data"][] = [
@@ -77,22 +87,27 @@ while($row = $query->fetch_assoc()){
 	}
 }
 $resultlist = [];
-$query = $DB->query("SELECT * FROM r18_teams WHERE t_id < 100 AND t_result > 0 ORDER BY t_result ASC");
+$query = $DB->query("SELECT * FROM r18_teams WHERE t_id < 100 ORDER BY t_result ASC");
 if($query->num_rows == 0){
 	exit("Inga lag");
 }
 $i = 1;
 while($row = $query->fetch_assoc()){
 	$team = new Team($row);
+	$stats[substr($team->getTsStart(),11,5)]["nr_start"]++;
+	$stats[substr($team->getTsStart2(),11,5)]["nr_start2"]++;
 	$stats[substr($team->getTsFinish(),11,5)]["nr_finish"]++;
 	$stats[substr($team->getTsLunchIn(),11,5)]["nr_lunchin"]++;
 	$stats[substr($team->getTsLunchOut(),11,5)]["nr_lunchout"]++;
-	$resultlist[] = [
-		"placement"=>$i,
-		"start_position"=>$team->getStartPosition(),
-		"name"=>$team->getName()
-	];
-	$i++;
+	if($team->getResult() > 0){
+		$resultlist[] = [
+			"placement"=>$i,
+			"start_position"=>$team->getStartPosition(),
+			"name"=>$team->getName()
+		];
+		$i++;
+	}
+	
 }
 
 $query = $DB->query("SELECT * FROM r18_messages WHERE m_ts_insert > '2018-09-29 07:00:00' AND m_ts_insert < '2018-09-29 17:00:00'");

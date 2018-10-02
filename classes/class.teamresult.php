@@ -15,9 +15,16 @@ class TeamResult extends Team{
 		$res -= $this->getCorrHaftig();
 		$res += 105*$this->getNrLocked();
 		$res += $this->getHelpBan();
+		$res += $this->missedLunchBan();
 		return $res;
 	}
 	
+	public function missedLunchBan(){
+		if($this->getTsLunchOut() == ""){
+			return 45;
+		}
+		return 0;
+	}
 	
 	public function getStartFinishDiffMinutes(){
 		$from_time = strtotime($this->getTsStart2());
