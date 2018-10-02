@@ -26,6 +26,7 @@ class Team extends GPFunctions{
 		$this->ts_lunch_out = $row["t_ts_lunch_out"];
 		$this->corr_stal = intval($row["t_corr_stal"]);
 		$this->corr_haftig = intval($row["t_corr_haftig"]);
+		$this->result = intval($row["t_result"]);
 	}
 	public static function constructById($id) {
 		global $DB;
@@ -86,6 +87,10 @@ class Team extends GPFunctions{
 		global $DB;
 		return $DB->query("UPDATE r18_teams SET t_corr_haftig='$nr' WHERE t_id='$this->id'");
 	}
+	public function setResult($nr){
+		global $DB;
+		return $DB->query("UPDATE r18_teams SET t_result='$nr' WHERE t_id='$this->id'");
+	}
 	
 	
 	public function __toString() {
@@ -126,6 +131,7 @@ class Team extends GPFunctions{
 	public function getTsLunchOut(){return $this->ts_lunch_out;}
 	public function getCorrStal(){return $this->corr_stal;}
 	public function getCorrHaftig(){return $this->corr_haftig;}
+	public function getResult(){return $this->result;}
 	public function hasStarted(){
 		return $this->getTsStart() != "";
 	}

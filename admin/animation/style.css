@@ -1,0 +1,47 @@
+html,body,div{margin:0px;padding:0px;font-family:arial;}
+
+#map{
+	background: url(../../images/map2.png);
+	background-repeat: no-repeat;
+	background-size: auto;
+}
+#clock{
+	position:absolute;
+	font-size:50px;
+	text-align:center;
+	width: 1345px;
+	top:20px;
+}
+#teams{
+	
+}
+#stats{
+	position:absolute;
+	left: 40px;
+	bottom: 450px;
+	padding: 10px;
+	background: rgba(255,255,255, 0.5);
+}
+#stats_tbl{
+	font-size:12px;
+}
+
+.fill{
+	width: 1345px;
+	height: 813px;
+	position:absolute;
+}
+.dot{
+	height: 25px;
+	width: 25px;
+	background-color: black;
+	color:white;
+	font-size:16px;
+	text-align: center;
+	border-radius: 50%;
+	display: inline-block;
+	margin-left:-10px;
+	margin-top:-10px;
+	position: absolute;
+}
+.hidden_name{font-size:14px;display:none;}

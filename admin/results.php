@@ -54,7 +54,9 @@ foreach($teamResArr as $k => $teamRes){
 	echo "<td>".$teamRes->getNrLocked()."</td>";
 	echo "<td>".$teamRes->getHelpBan()."</td>";
 	
-	echo "<td>".$teamRes->computeResult()."</td>";
+	$res = $teamRes->computeResult();
+	$teamRes->setResult($res);
+	echo "<td>$res</td>";
 	echo "</tr>";
 }
 echo '</table>';
