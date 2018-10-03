@@ -46,7 +46,7 @@ while($row = $query->fetch_assoc()){
 		$subarr["data"][] = [
 			"lat" => 59.820733,
 			"lng" => 17.656450,
-			"ts" => $team->getTsStart()
+			"ts" => $team->getTsStart2()
 		];
 		$subarr["data"][] = [
 			"lat" => 60.000534,
@@ -92,6 +92,7 @@ if($query->num_rows == 0){
 	exit("Inga lag");
 }
 $i = 1;
+$teams_without_result = [];
 while($row = $query->fetch_assoc()){
 	$team = new Team($row);
 	$stats[substr($team->getTsStart(),11,5)]["nr_start"]++;
@@ -101,13 +102,20 @@ while($row = $query->fetch_assoc()){
 	$stats[substr($team->getTsLunchOut(),11,5)]["nr_lunchout"]++;
 	if($team->getResult() > 0){
 		$resultlist[] = [
-			"placement"=>$i,
+			"placement"=>$i++,
 			"start_position"=>$team->getStartPosition(),
 			"name"=>$team->getName()
 		];
-		$i++;
+	}else{
+		$teams_without_result[] = $team;
 	}
-	
+}
+foreach($teams_without_result as $twr){
+	$resultlist[] = [
+		"placement"=>$i++,
+		"start_position"=>$twr->getStartPosition(),
+		"name"=>$twr->getName()
+	];
 }
 
 $query = $DB->query("SELECT * FROM r18_messages WHERE m_ts_insert > '2018-09-29 07:00:00' AND m_ts_insert < '2018-09-29 17:00:00'");
@@ -146,11 +154,13 @@ while($row = $query->fetch_assoc()){
 <html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="style.css">
+		<meta http-equiv="refresh" content="40" />
 	</head>
 	<body>
 
 		<div id="map" class="fill">
 			<div id="clock"></div>
+			<div id="cars"></div>
 			<div id="teams" class="fill"></div>
 			<div id="stats"><table id="stats_table"></table></div>
 		</div>
