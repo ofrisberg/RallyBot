@@ -5,11 +5,15 @@ class TeamResult extends Team{
 	public function __construct($row) {
 		parent::__construct($row);
 		$this->result = $this->computeResult();
-		
 	}
 	
 	public function computeResult(){
 		$res = 0;
+		
+		if($this->getTsFinish() == ""){
+			return $this->getResult();
+		}
+
 		$res += $this->getStartFinishDiffMinutes();
 		$res -= $this->getCorrStal();
 		$res -= $this->getCorrHaftig();

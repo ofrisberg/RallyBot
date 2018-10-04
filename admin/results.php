@@ -12,7 +12,7 @@ if(!isset($_SESSION["rr_admin"]) || !$_SESSION["rr_admin"]){
 echo '<html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body>';
 echo '<style>table {border-collapse: collapse;}table, th, td {border: 1px solid black;}</style>';
 
-$query = $DB->query("SELECT * FROM r18_teams WHERE t_start_position<=99 AND t_ts_finish IS NOT NULL ORDER BY t_start_position ASC");
+$query = $DB->query("SELECT * FROM r18_teams WHERE t_start_position<=99");
 if($query->num_rows == 0){
 	exit("Inga lag");
 }
